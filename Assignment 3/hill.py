@@ -1,6 +1,7 @@
 import board as bd
 import numpy as np
 import sys
+import time
 
 def hill_climbing(board, queens):
     # Get a map of the board in list form
@@ -29,11 +30,6 @@ def hill_climbing(board, queens):
                 # Get number of hits at current position
                 hits = board.get_fitness()
 
-                board.show_map()
-                print("Hits:", hits)
-                print()
-                print("----------------------")
-
                 # Compare hits with least number of hits for that row
                 if hits < leastHits:
                     leastHits = hits
@@ -48,30 +44,37 @@ def hill_climbing(board, queens):
         # that contained the least number of hits to a 1
         leastHits = None
         board.flip(minRow, minCol)
-        print("New Iteration")
-        print()
-            
-    board.show_map()
-    print("Hits:", board.get_fitness())
+
     return map
-        
-        
-        
-        
+    
 def find_col(map, row):
     for col in range(len(map)):
         if map[row][col] == 1:
             return col
 
 if __name__ == '__main__':
+    start = time.time()
+    restart = 0
     queens = 5
-    #queens = sys.argv[1]
     board = bd.Board(queens)
-
+    
     board.show_map()
-    print("Current Hits:", board.get_fitness())
+    print("Hits: ", board.get_fitness())
     print()
-    print("----------------------------------")
+    print("-----------------------------")
     print()
 
-    hill_climbing(board, queens)
+    while board.get_fitness() != 0:
+        hill_climbing(board, queens)
+        restart += 1
+        board = bd.Board(queens)
+        
+    
+    # hill_climbing(board, queens)
+
+    milliseconds = 1000
+    print("Running time", "{0:.2f}".format( (time.time() - start) * milliseconds), "ms")
+    board.show_map()
+    print("Hits:", board.get_fitness())
+    print("Restarts:", restart)
+    
