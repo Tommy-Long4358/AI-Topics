@@ -1,0 +1,73 @@
+# Testcases from one destination to another and reversed
+pairs = [["SanFrancisco", "LongBeach"], ["Eureka", "Monterey"], ["Monterey", "SanDiego"], ["Yosemite", "LongBeach"], ["LongBeach", "SanFrancisco"], ["Eureka", "SouthLakeTahoe"]]
+
+for pair in pairs:
+    
+    print("From city:", pair[0])
+    print("To city:", pair[1])
+
+    optimal_route = a_star(pair[0], pair[1])
+    route = ""
+    for i in range(len(optimal_route)):
+        if i == len(optimal_route) - 1:
+            route += optimal_route[i]
+            break
+
+        route += optimal_route[i] + " - "
+
+    print("Best Route:", route)
+    print("Total distance:", "{0:.2f}".format(distance_calculator(optimal_route)), "mi")
+
+    print()
+
+    print("From city:", pair[1])
+    print("To city:", pair[0])
+
+    optimal_route = a_star(pair[1], pair[0])
+    route = ""
+    for i in range(len(optimal_route)):
+        if i == len(optimal_route) - 1:
+            route += optimal_route[i]
+            break
+
+        route += optimal_route[i] + " - "
+
+    print("Best Route:", route)
+    print("Total distance:", "{0:.2f}".format(distance_calculator(optimal_route)), "mi")
+    
+    print()
+    print("--------------------------")
+    print()
+
+Example Output:
+
+python a-star.py SanFrancisco LongBeach
+From city: SanFrancisco
+To city: LongBeach
+Best Route: SanFrancisco - SanJose - Fresno - LosAngeles - LongBeach
+Total distance: 442.50 mi
+
+From city: Eureka
+To city: Monterey
+Best Route: Eureka - SanFrancisco - SanJose - Monterey
+Total distance: 391.10 mi
+
+From city: Monterey
+To city: SanDiego
+Best Route: Monterey - SantaBarbara - SantaMonica - SanDiego
+Total distance: 416.70 mi
+
+From city: Yosemite
+To city: LongBeach
+Best Route: Yosemite - Fresno - LosAngeles - LongBeach
+Total distance: 306.80 mi
+
+From city: LongBeach
+To city: SanFrancisco
+Best Route: LongBeach - LosAngeles - Fresno - SanJose - SanFrancisco
+Total distance: 442.50 mi
+
+From city: Eureka
+To city: SouthLakeTahoe
+Best Route: Eureka - Sacramento - SouthLakeTahoe
+Total distance: 392.00 mi
