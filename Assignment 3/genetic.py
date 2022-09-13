@@ -5,35 +5,39 @@ import random as rand
 import time
 
 def genetic(queens):
-    states = []
-    fitness = []
+    bestGene = None
+    resets = 0
+    while not bestGene:
+        states = []
+        fitness = []
 
-    # State creation and nonfitness calculator
-    for i in range(len(queens)):
-        states.append(construct_state(queens[i].get_map()))
-        fitness.append(nonFitness(queens[i]))
+        # State creation and nonfitness calculator
+        for i in range(len(queens)):
+            states.append(construct_state(queens[i].get_map()))
+            fitness.append(nonFitness(queens[i]))
 
-    # Selection
-    randomStates = selection(fitness, states)
+        # Selection
+        randomStates = selection(fitness, states)
+        
+        # Cross-Over
+        for i in range(0, len(randomStates), 2):
+            # Mix and match pairs on index pivot
+            indexPivot = rand.randint(0, len(queens[0].map) - 1) + 1
 
-    #print("Chosen States:", randomStates)
-    
-    # Cross-Over
-    # Mix and match pairs on index pivot
-    for i in range(0, len(randomStates), 2):
-        # ????
-        indexPivot = rand.randint(0, len(queens[0].map) - 1) + 1
+            [randomStates[i], randomStates[i + 1]] = cross_over(randomStates[i], randomStates[i + 1], indexPivot)
+            
+        # Mutate state and copy it to board of queen[i]
+        for i in range(len(queens)):
+            randomStates[i] = mutation(randomStates[i])
+            queens[i] = construct_map(queens[i], randomStates[i])
 
-        [randomStates[i], randomStates[i + 1]] = cross_over(randomStates[i], randomStates[i + 1], indexPivot)
-    
-    #print("Cross-Over:", randomStates)
+            if queens[i].get_fitness() == 0:
+                bestGene = queens[i]
+                print("Total resets:", resets)
 
-    # Mutate state and copy it to board of queen[i]
-    for i in range(len(queens)):
-        randomStates[i] = mutation(randomStates[i])
-        queens[i] = construct_map(queens[i], randomStates[i])
+        resets += 1
 
-    return queens 
+    return bestGene 
 
 def construct_state(map):
     # State is made up of the column positions of all the 1's on the board
@@ -49,6 +53,9 @@ def construct_map(queen, state):
     for i in range(len(queen.get_map())):
         # Find position of current 1 in the map
         col = find_col(queen.get_map(), i)
+
+        if int(state[i]) - 1 == col:
+            continue
 
         # Flip new position to 1 and old position to 0
         queen.flip(i, col)
@@ -67,19 +74,8 @@ def nonFitness(queen):
     totalPossibleAttacks = math.comb(5, 2)
     hits = queen.get_fitness()
 
-    #queens[i].show_map()
-    #print("Hits: ", queens[i].get_fitness())
-
-    nonAttack = totalPossibleAttacks - hits
-
-    '''
-    print(totalPossibleAttacks, " - ", hits, " = ", nonAttack)
-    print()
-    print("--------------------------")
-    print()
-    '''
-
-    return nonAttack
+    nonAttacking = totalPossibleAttacks - hits
+    return nonAttacking
 
 def selection(fitness, states):
     randomStates = []
@@ -87,11 +83,8 @@ def selection(fitness, states):
 
     # Calculate percentage of each state being chosen (fitness[i] / total fitness)
     for i in range(len(fitness)):
-        selectPercent = round(fitness[i] / sum(fitness), 2)
-
-        #print(fitness[i], " / ", sum(fitness), " = ", selectPercent)
-
-        percentSelections.append(selectPercent)
+        percentRate = round(fitness[i] / sum(fitness), 2)
+        percentSelections.append(percentRate)
 
     # Randomly pick 8 states
     for i in range(len(states)):
@@ -142,7 +135,7 @@ def cross_over(state1, state2, indexPivot):
 def mutation(state):
     # Generate a random index and number
     randIndex = rand.randint(0, len(state) - 1)
-    randNum = rand.randint(1, len(state) - 1)
+    randNum = rand.randint(1, len(state))
     
     # Replace index in state with number
     state = state[:randIndex] + str(randNum) + state[randIndex + 1:] 
@@ -158,15 +151,7 @@ if __name__ == '__main__':
     queens = [bd.Board(queen), bd.Board(queen), bd.Board(queen), bd.Board(queen), bd.Board(queen),
                 bd.Board(queen), bd.Board(queen), bd.Board(queen)]
 
-    bestGene = None
-    print("test")
-    while bestGene is None:
-        for i in range(len(queens)):
-            if queens[i].get_fitness() == 0:
-                bestGene = queens[i]
-                break
-
-        queens = genetic(queens)
+    bestGene = genetic(queens)
 
     print("Running time", "{0:.2f}".format( (time.time() - start) * milliseconds), "ms")
     bestGene.show_map()
