@@ -6,7 +6,6 @@ import time
 
 def genetic(queens):
     bestGene = None
-    resets = 0
     while not bestGene:
         states = []
         fitness = []
@@ -26,16 +25,17 @@ def genetic(queens):
 
             [randomStates[i], randomStates[i + 1]] = cross_over(randomStates[i], randomStates[i + 1], indexPivot)
             
-        # Mutate state and copy it to board of queen[i]
+        # Mutate state and match the queen[i] board to the new state
         for i in range(len(queens)):
-            randomStates[i] = mutation(randomStates[i])
+            mutationChance = rand.randint(1, 10)
+            
+            if mutationChance == 3:
+                randomStates[i] = mutation(randomStates[i])
+                
             queens[i] = construct_map(queens[i], randomStates[i])
 
             if queens[i].get_fitness() == 0:
                 bestGene = queens[i]
-                print("Total resets:", resets)
-
-        resets += 1
 
     return bestGene 
 
@@ -45,6 +45,7 @@ def construct_state(map):
     for row in range(len(map)):
         for col in range(len(map)):
             if map[row][col] == 1:
+                # Column positions start at 1 rather than 0
                 state += str(col + 1)
         
     return state
@@ -54,6 +55,7 @@ def construct_map(queen, state):
         # Find position of current 1 in the map
         col = find_col(queen.get_map(), i)
 
+        # Ignore any state that is still in the original position
         if int(state[i]) - 1 == col:
             continue
 
@@ -63,6 +65,7 @@ def construct_map(queen, state):
 
     return queen
 
+# Find the column index of where 1 is on the board on a given row
 def find_col(map, row):
     for col in range(len(map)):
         if map[row][col] == 1:
