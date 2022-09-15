@@ -5,7 +5,6 @@ import time
 def hill_climbing(board, queens):
     # Get a map of the board in list form
     map = board.get_map()
-    resets = 0
 
     while True:
         for i in range(queens):
@@ -45,29 +44,26 @@ def hill_climbing(board, queens):
             # that contained the least number of hits to a 1
             leastHits = None
             board.flip(minRow, minCol)
-        
-        if board.get_fitness() == 0:
-            #print("Best board found!")
-            break
+
         '''
+        print("Final Board:")
         board.show_map()
-        print("Hits:", board.get_fitness())
-
+        print("Current fitness:", board.get_fitness())
         print()
-        print("--------------------------")
-        print()
-
-        print("Generating new board!")
         '''
-        board = bd.Board(5)
 
-        #board.show_map()
-        #print("Hits:", board.get_fitness())
-        #print()
+        if board.get_fitness() == 0:
+            break
 
-        resets += 1
+        board = bd.Board(queens)
 
-    print("Resets:", resets)
+        '''
+        print("New Randomly Generated Board")
+        board.show_map()
+        print("New Random Generated fitness:", board.get_fitness())
+        print()
+        '''
+
     return board
     
 def find_col(map, row):
@@ -81,9 +77,16 @@ if __name__ == '__main__':
     board = bd.Board(queens)
     milliseconds = 1000
 
+    '''
+    print("Initial Board:")
+    board.show_map()
+    print("Current Fitness:", board.get_fitness())
+    print()
+    '''
+    
     board = hill_climbing(board, queens)
 
     print("Running time", "{0:.2f}".format( (time.time() - start) * milliseconds), "ms")
     board.show_map()
+
     #print("Hits:", board.get_fitness())
-    
