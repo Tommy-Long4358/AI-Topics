@@ -10,30 +10,34 @@ import sys
 def alphaCompute(vectAnswer):
     return 1 / (vectAnswer[0] + vectAnswer[1])
 
-def hmmFiltering(count):
+def hmmFiltering():
     ans = []
 
-    # Base case
-    if count == 0:
-        return x0
+    # Start off initially at x0
+    sigmaPast = X0
 
-    # Accounts for different boolean evidence variables
-    if eStates[count - 1] == True:
-        ans = [probTable2[True], probTable2[False]]
+    # Loop through all states
+    for count in range(len(eStates)):
+        # Accounts for different boolean evidence variables
+        if eStates[count] == True:
+            ans = [probTable2[True], probTable2[False]]
 
-    else:
-        ans = [1 - probTable2[True], 1 - probTable2[False]]
+        else:
+            ans = [1 - probTable2[True], 1 - probTable2[False]]
+        
+        # Sigma Computation with sigmaPast keeping past state calculations
+        sigmaAns = [probTable1[True] *  sigmaPast[0] + probTable1[False] * sigmaPast[1], 
+            (1 - probTable1[True]) *  sigmaPast[0] + (1 - probTable1[False]) * sigmaPast[1]]
+        
+        # <p(et|xt), p(et|-xt)> * sigma answer
+        ans = [ans[0] * sigmaAns[0], ans[1] * sigmaAns[1]]
+
+        # Solve for alpha
+        ans = [ans[0] * alphaCompute(ans), ans[1] * alphaCompute(ans)]
+
+        # Update sigmaPast with new calculation
+        sigmaPast = ans
     
-    # Sigma Computation with recursion
-    sigmaAns = [probTable1[True] *  hmmFiltering(count - 1)[0] + probTable1[False] * hmmFiltering(count - 1)[1], 
-         (1 - probTable1[True]) *  hmmFiltering(count - 1)[0] + (1 - probTable1[False]) * hmmFiltering(count - 1)[1]]
-    
-    # <p(et|xt), p(et|-xt)> * sigma answer
-    ans = [ans[0] * sigmaAns[0], ans[1] * sigmaAns[1]]
-
-    # Solve for alpha
-    ans = [ans[0] * alphaCompute(ans), ans[1] * alphaCompute(ans)]
-
     return ans
 
 # Get input from python terminal
@@ -56,20 +60,26 @@ for line in cptFile:
     # Split each element in the line at the ","
     independVariList = line.split(",")
 
-    # x0 = <a, 1 - a>
-    x0 = [float(independVariList[0]), 1 - float(independVariList[0])]
+    # P(X0) = <a, 1 - a>
+    X0 = [float(independVariList[0]), 1 - float(independVariList[0])]
 
     # e1:t = <e0,e1,...,et>
     eStates = [True if boolean == "t" else False for boolean in independVariList[5:]]
 
-    # p(xt | Xt-1) table: 
+    # p(xt | Xt-1) table:
+    # Xt-1  P(xt)
+    #  T     b
+    #  F     c
     probTable1 = {True: float(independVariList[1]), False: float(independVariList[2])}
 
-    # p(et | xt) table
+    # p(et | Xt) table
+    #  Xt  P(et)
+    #  T     d
+    #  F     f
     probTable2 = {True: float(independVariList[3]), False: float(independVariList[4])}
 
     # Do HMM filtering calculaction
-    ans = hmmFiltering(len(eStates))
+    ans = hmmFiltering()
 
     # Display
     print(f'{line}--><{"{:.4f}".format(ans[0])}, {"{:.4f}".format(ans[1])}>')
