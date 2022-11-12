@@ -3,7 +3,6 @@ import sys
 '''
 Filtering is computing the belief state (posterior distribution over the most 
 recent state) given all evidence to date.
-
 aka use past data to calculate current data
 '''
 import sys
@@ -25,13 +24,12 @@ def hmmFiltering(count):
     else:
         ans = [1 - probTable2[True], 1 - probTable2[False]]
     
-    
     # Sigma Computation with recursion
-    a = [probTable1[True] *  hmmFiltering(count - 1)[0] + probTable1[False] * hmmFiltering(count - 1)[0], 
-         (1 - probTable1[True]) *  hmmFiltering(count - 1)[0] + (1 - probTable1[False]) * hmmFiltering(count - 1)[0]]
+    sigmaAns = [probTable1[True] *  hmmFiltering(count - 1)[0] + probTable1[False] * hmmFiltering(count - 1)[1], 
+         (1 - probTable1[True]) *  hmmFiltering(count - 1)[0] + (1 - probTable1[False]) * hmmFiltering(count - 1)[1]]
     
     # <p(et|xt), p(et|-xt)> * sigma answer
-    ans = [ans[0] * a[0], ans[1] * a[1]]
+    ans = [ans[0] * sigmaAns[0], ans[1] * sigmaAns[1]]
 
     # Solve for alpha
     ans = [ans[0] * alphaCompute(ans), ans[1] * alphaCompute(ans)]
